@@ -7,3 +7,4 @@
 - OpenTelemetry 导出为可选能力，本地 JSONL/SQLite 才是审计来源；
 - 不支持视觉、多模态、RAG、向量数据库、MCP、短信和通用 Shell；
 - Skill 不会由模型自动修改，任何 Skill 变更必须由开发者审核。
+- 腾讯云公网 HTTPS 已通过临时 nip.io 域名验证；正式域名、管理员账号和备份恢复仍需完成最后远程验收。

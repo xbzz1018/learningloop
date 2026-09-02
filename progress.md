@@ -102,3 +102,7 @@
 - Added and executed Resume Metrics V1 against official DeepSeek: 16 calls measured progressive Skill loading, bounded context, summary compression and frozen routing cases.
 - Verified results: 74.28% Skill input-token reduction, 57.82% bounded-history reduction, 95.34% summary reduction, 80% Flash share and 33.07% estimated cost reduction versus counterfactual Pro-only pricing.
 - Tencent Cloud deployment remains blocked because the only discovered host (`43.131.243.184`) times out during SSH banner exchange and no `learn.xbzz.cloud` DNS record exists.
+- Confirmed Tencent Cloud server `43.131.243.184` with Ubuntu 22.04, Docker 29.1.3 and Compose 2.40.3; existing Nginx owns ports 80/443 and existing OpsPilot/Sub2API containers were preserved.
+- Deployed fixed source release `6055990` to `/opt/learningloop/current`, built and started a separate LearningLoop container on `127.0.0.1:8765`.
+- Added Nginx reverse proxy for `learningloop.43-131-243-184.nip.io`; Certbot issued a Let's Encrypt certificate valid until 2026-12-01.
+- Public HTTPS `/health` returns `0.3.1`; admin account creation, login flow, backup/restore and restart recovery are pending final SSH acceptance.

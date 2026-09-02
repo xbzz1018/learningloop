@@ -19,7 +19,7 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 - [x] 11. P3: official DeepSeek pricing profiles, complete usage semantics, and optional OpenTelemetry
 - [x] 12. P4: lightweight account isolation and authenticated API/UI
 - [x] 13. P5: OpenAPI snapshot, UI runtime status, backup/restore, and security checks
-- [ ] 14. P6: Caddy/Tencent Cloud deployment assets, full regression, and delivery documentation
+- [ ] 14. P6: Nginx/Tencent Cloud deployment assets, remote acceptance, and delivery documentation
 - [x] 15. 双平面 Agent：Interactive/Autonomous 角色、结构化产物、Trace 与主动调度
 
 ## Locked Decisions
@@ -69,7 +69,7 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 - The live Docker Flash smoke completed a normal ReAct tool loop in a new session: `completed`, 1 call, 1,226 tokens, official-price estimate `$0.00038208`.
 - The same smoke window contains no `a coroutine was expected` or `stream crashed` errors. Task details, start state, result modal, mastery/error and deterministic review were verified in the browser.
 - Functional Evaluation V1 passed 10/10 deterministic scenarios. Final structured artifacts, recovery, state integrity and idempotency each passed 100%; these are functional metrics, not model-quality or production-load results.
-- Tencent Cloud DNS/HTTPS remains an external acceptance step; real SMTP test delivery has passed.
+- Tencent Cloud HTTPS and public health check passed on `https://learningloop.43-131-243-184.nip.io`; admin-account, backup/restore and restart acceptance remain.
 
 ### 双平面 Agent 增强
 

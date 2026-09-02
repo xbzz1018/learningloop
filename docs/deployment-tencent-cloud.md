@@ -1,14 +1,14 @@
 # 腾讯云 CVM 私有部署
 
 该部署面向实验室少量成员使用，不开放注册，也不提供企业组织、OAuth 或复杂 RBAC。
-Caddy 只负责 HTTPS 和反向代理，LearningLoop 应用负责轻量账号、会话和数据隔离。
+现有 Nginx 负责 HTTPS 和反向代理，LearningLoop 应用负责轻量账号、会话和数据隔离。部署不会替换已有 Nginx、OpsPilot 或 Sub2API 服务。
 
 ## 1. 服务器准备
 
 在腾讯云 CVM 上安装 Docker Engine 和 Compose 插件，安全组只开放：
 
 - `22/tcp`：仅允许管理员办公网络；
-- `80/tcp`、`443/tcp`：Caddy 自动签发和续期证书。
+- `80/tcp`、`443/tcp`：Nginx/Certbot HTTPS 和反向代理。
 
 应用容器只通过 Compose 内部网络暴露 `8765`，不直接绑定公网端口。
 应用容器使用非 root 用户运行；每个 HTTP 请求返回 `X-Request-ID`，用于关联日志、Run 和模型调用。
@@ -24,6 +24,8 @@ LEARNINGLOOP_AUTH_COOKIE_SECURE=true
 ```
 
 密钥只通过服务器环境变量注入，不写入镜像、日志、SQLite 或前端。
+
+当前验收实例：`https://learningloop.43-131-243-184.nip.io`。正式域名应新增 DNS A 记录后替换该地址。
 
 ## 3. 启动和创建账号
 
@@ -60,3 +62,11 @@ docker compose -f docker-compose.tencent.yml up -d app
 - `/health` 返回 `0.3.1` 和脱敏 Provider 状态；
 - 官方 API 调用、Token、缓存和费用估算能在用量页复算；
 - SMTP 失败不会回滚学习状态。
+
+已完成的远程验收：
+
+- `/opt/learningloop/current` 已部署固定版本代码；
+- Docker 镜像在服务器构建成功，容器绑定 `127.0.0.1:8765`；
+- Nginx 配置检查通过并已反向代理；
+- Let's Encrypt 证书签发成功，HTTPS 公网访问和 `/health` 均返回 `0.3.1`；
+- 管理员账号创建、登录隔离、SQLite 备份/恢复和重启恢复需完成最后远程验收。
