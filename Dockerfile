@@ -19,7 +19,8 @@ RUN addgroup --system learningloop \
     && mkdir -p /data \
     && chown -R learningloop:learningloop /data
 COPY docker-entrypoint.sh /usr/local/bin/learningloop-entrypoint
-RUN chmod 755 /usr/local/bin/learningloop-entrypoint
+RUN sed -i 's/\r$//' /usr/local/bin/learningloop-entrypoint \
+    && chmod 755 /usr/local/bin/learningloop-entrypoint
 
 VOLUME ["/data"]
 EXPOSE 8765
