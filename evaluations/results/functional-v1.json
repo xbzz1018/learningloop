@@ -1,0 +1,135 @@
+{
+  "suite_id": "learningloop-functional-v1",
+  "schema_version": 1,
+  "generated_at": "2026-09-02T09:23:39.537114+00:00",
+  "environment": {
+    "learningloop_version": "0.3.1",
+    "python": "3.12.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "runner_sha256": "776cf3ac23fe1a34c6c3b11e5ce4c8ed45f35950fcfeaae95bee292e63bfcaf2"
+  },
+  "cases": [
+    {
+      "name": "react_tool_loop",
+      "category": "agent_runtime",
+      "status": "passed",
+      "latency_ms": 387.38,
+      "details": {
+        "model_calls": 2,
+        "answer_present": true
+      },
+      "error": null
+    },
+    {
+      "name": "structured_plan",
+      "category": "structured_output",
+      "status": "passed",
+      "latency_ms": 299.63,
+      "details": {
+        "content_source": "model",
+        "stages": 5
+      },
+      "error": null
+    },
+    {
+      "name": "empty_plan_fallback",
+      "category": "structured_output",
+      "status": "passed",
+      "latency_ms": 318.75,
+      "details": {
+        "content_source": "fallback",
+        "stages": 5
+      },
+      "error": null
+    },
+    {
+      "name": "approval_idempotency",
+      "category": "recovery",
+      "status": "passed",
+      "latency_ms": 483.14,
+      "details": {
+        "idempotent": true,
+        "course_version": 2
+      },
+      "error": null
+    },
+    {
+      "name": "task_mastery",
+      "category": "state_integrity",
+      "status": "passed",
+      "latency_ms": 430.12,
+      "details": {
+        "task_completed": true,
+        "mastery": 0.2975
+      },
+      "error": null
+    },
+    {
+      "name": "low_score_error",
+      "category": "state_integrity",
+      "status": "passed",
+      "latency_ms": 545.1,
+      "details": {
+        "errors": 1,
+        "review_cards": 1
+      },
+      "error": null
+    },
+    {
+      "name": "review_reschedule",
+      "category": "state_integrity",
+      "status": "passed",
+      "latency_ms": 667.25,
+      "details": {
+        "review_count": 2,
+        "due_extended": true
+      },
+      "error": null
+    },
+    {
+      "name": "notification_idempotency",
+      "category": "idempotency",
+      "status": "passed",
+      "latency_ms": 628.71,
+      "details": {
+        "first_deliveries": 2,
+        "duplicate_deliveries": 0
+      },
+      "error": null
+    },
+    {
+      "name": "owner_isolation",
+      "category": "isolation",
+      "status": "passed",
+      "latency_ms": 284.99,
+      "details": {
+        "owner_a_visible": true,
+        "owner_b_visible": false
+      },
+      "error": null
+    },
+    {
+      "name": "restart_recovery",
+      "category": "recovery",
+      "status": "passed",
+      "latency_ms": 570.39,
+      "details": {
+        "session_status": "recovering",
+        "run_status": "recovering"
+      },
+      "error": null
+    }
+  ],
+  "aggregate": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "scenario_pass_rate": 1.0,
+    "structured_artifact_rate": 1.0,
+    "recovery_success_rate": 1.0,
+    "state_integrity_rate": 1.0,
+    "idempotency_rate": 1.0,
+    "p50_latency_ms": 456.63,
+    "p95_latency_ms": 667.25
+  }
+}

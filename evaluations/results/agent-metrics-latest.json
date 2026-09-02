@@ -1,0 +1,21 @@
+{
+  "method": {
+    "context_token_estimator": "utf8_bytes_div_4",
+    "cost_baseline": "requires a separately recorded Pro-only run",
+    "null_policy": "missing usage, price, or baseline remains null"
+  },
+  "full_context_tokens": null,
+  "bounded_context_tokens": null,
+  "context_reduction": null,
+  "calls": 25,
+  "calls_by_agent_role": {
+    "interactive": 25
+  },
+  "calls_by_model_route": {
+    "flash": 17,
+    "pro": 8
+  },
+  "flash_call_share": 0.68,
+  "estimated_cost_usd": null,
+  "cost_comparison_vs_pro_only": null
+}

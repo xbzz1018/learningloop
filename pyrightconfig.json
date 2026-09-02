@@ -1,0 +1,13 @@
+{
+  "include": [
+    "src/learningloop/auth.py",
+    "src/learningloop/backup.py",
+    "src/learningloop/observability.py",
+    "src/learningloop/agent/runtime.py",
+    "src/learningloop/agent/context.py",
+    "src/learningloop/agent/hooks.py",
+    "src/learningloop/agent/policy.py"
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": "none"
+}

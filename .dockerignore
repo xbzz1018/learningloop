@@ -1,0 +1,10 @@
+.env
+.git
+.pytest_cache
+.ruff_cache
+data
+dist
+build
+!third_party/wheels/*.whl
+*.pyc
+__pycache__

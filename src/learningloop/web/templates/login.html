@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearningLoop 登录</title>
+  <link rel="stylesheet" href="/static/style.css?v=0.3.1">
+</head>
+<body class="login-page">
+  <main class="login-panel">
+    <div class="brand-mark">LL</div>
+    <p class="eyebrow">PRIVATE LEARNING WORKSPACE</p>
+    <h1>登录 LearningLoop</h1>
+    <p class="muted">这是一个受控的实验室学习实例，账号由管理员创建。</p>
+    <form method="post" action="/login" class="login-form">
+      <label><span>用户名</span><input name="username" autocomplete="username" required></label>
+      <label><span>密码</span><input name="password" type="password" autocomplete="current-password" required></label>
+      {% if error %}<p class="form-feedback error">{{ error }}</p>{% endif %}
+      <button class="button primary" type="submit">登录</button>
+    </form>
+  </main>
+</body>
+</html>

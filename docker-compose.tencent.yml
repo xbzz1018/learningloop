@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      LEARNINGLOOP_DATA_DIR: /data
+      LEARNINGLOOP_SKILLS_DIR: /app/skills
+      LEARNINGLOOP_HOST: 0.0.0.0
+      LEARNINGLOOP_PORT: 8765
+      LEARNINGLOOP_AUTH_ENABLED: "true"
+      LEARNINGLOOP_AUTH_COOKIE_SECURE: "true"
+    expose:
+      - "8765"
+    volumes:
+      - learningloop-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      LEARNINGLOOP_DOMAIN: ${LEARNINGLOOP_DOMAIN:?set a domain name in .env}
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  learningloop-data:
+  caddy-data:
+  caddy-config:

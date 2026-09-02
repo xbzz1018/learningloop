@@ -1,0 +1,10 @@
+{$LEARNINGLOOP_DOMAIN} {
+    encode gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        -Server
+    }
+    reverse_proxy app:8765
+}

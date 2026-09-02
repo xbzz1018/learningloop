@@ -1,0 +1,131 @@
+{
+  "suite_id": "learningloop-resume-metrics-v1",
+  "generated_at": "2026-09-02T21:39:58.001288+08:00",
+  "benchmark_sha256": "a325296a35b2bb3b8ef1415fc33384b49cb5d8bcc9056bcac2229c56b48fc3e8",
+  "pricing_version": "deepseek-official-2026-08-16",
+  "provider": "official",
+  "models": {
+    "flash": "deepseek-v4-flash",
+    "pro": "deepseek-v4-pro"
+  },
+  "routing": {
+    "total_cases": 10,
+    "flash_cases": 8,
+    "pro_cases": 2,
+    "flash_share": 0.8,
+    "cases": [
+      {
+        "case_id": "goal_intake",
+        "route": "flash",
+        "input_tokens": 44,
+        "output_tokens": 211,
+        "estimated_cost_usd": 0.00014894000000000002,
+        "status": "success"
+      },
+      {
+        "case_id": "concept_explanation",
+        "route": "flash",
+        "input_tokens": 42,
+        "output_tokens": 51,
+        "estimated_cost_usd": 4.2900000000000006e-05,
+        "status": "success"
+      },
+      {
+        "case_id": "practice_generation",
+        "route": "flash",
+        "input_tokens": 42,
+        "output_tokens": 144,
+        "estimated_cost_usd": 0.00010428,
+        "status": "success"
+      },
+      {
+        "case_id": "answer_feedback",
+        "route": "flash",
+        "input_tokens": 41,
+        "output_tokens": 109,
+        "estimated_cost_usd": 8.096e-05,
+        "status": "success"
+      },
+      {
+        "case_id": "daily_plan",
+        "route": "flash",
+        "input_tokens": 42,
+        "output_tokens": 495,
+        "estimated_cost_usd": 0.00033594,
+        "status": "success"
+      },
+      {
+        "case_id": "daily_review",
+        "route": "flash",
+        "input_tokens": 41,
+        "output_tokens": 30,
+        "estimated_cost_usd": 2.8820000000000002e-05,
+        "status": "success"
+      },
+      {
+        "case_id": "due_review",
+        "route": "flash",
+        "input_tokens": 43,
+        "output_tokens": 134,
+        "estimated_cost_usd": 9.790000000000001e-05,
+        "status": "success"
+      },
+      {
+        "case_id": "normal_plan",
+        "route": "flash",
+        "input_tokens": 44,
+        "output_tokens": 94,
+        "estimated_cost_usd": 7.172e-05,
+        "status": "success"
+      },
+      {
+        "case_id": "long_plan",
+        "route": "pro",
+        "input_tokens": 45,
+        "output_tokens": 456,
+        "estimated_cost_usd": 0.00093258,
+        "status": "success"
+      },
+      {
+        "case_id": "major_recovery",
+        "route": "pro",
+        "input_tokens": 43,
+        "output_tokens": 918,
+        "estimated_cost_usd": 0.00184602,
+        "status": "success"
+      }
+    ]
+  },
+  "context": {
+    "skill_progressive_loading": {
+      "baseline_input_tokens": 762,
+      "optimized_input_tokens": 196,
+      "reduction": 0.7428,
+      "usage_source": "chat"
+    },
+    "bounded_history": {
+      "baseline_input_tokens": 2034,
+      "optimized_input_tokens": 858,
+      "reduction": 0.5782,
+      "usage_source": "chat"
+    },
+    "summary_compression": {
+      "baseline_input_tokens": 1245,
+      "optimized_input_tokens": 58,
+      "reduction": 0.9534,
+      "usage_source": "chat"
+    }
+  },
+  "cost": {
+    "mixed_route_estimated_usd": 0.00369006,
+    "counterfactual_pro_only_estimated_usd": 0.00551298,
+    "estimated_reduction": 0.3307,
+    "actual_bill": null,
+    "method": "same observed token counts repriced with official Pro rates"
+  },
+  "limitations": [
+    "Routing cases validate policy and JSON completion, not answer quality.",
+    "Cost is an official-price estimate, not the provider bill.",
+    "Context reductions use provider-reported input tokens for fixed prompts."
+  ]
+}
