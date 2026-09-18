@@ -1,6 +1,15 @@
 # LearningLoop
 
-LearningLoop 0.3.1 is a personal learning assistant for long-running study goals. It uses one shared Python Agent Harness runtime with two controlled entrypoints: an Interactive Agent for user conversations and an Autonomous Agent for scheduled plans, reviews, and recovery. Both entrypoints load Chinese learning Skills, call typed tools, preserve learning state, schedule reviews with FSRS, require approval before replacing a plan, and record every model call's usage and cost estimate.
+LearningLoop 0.3.1 is a personal learning assistant for long-running study goals. It turns a vague goal into an executable plan, guides daily work, schedules FSRS reviews, and records the evidence needed to recover after interruptions.
+
+The runtime has two controlled entrypoints: an Interactive Agent for user conversations and an Autonomous Agent for scheduled plans, reviews, and recovery. Both entrypoints load Chinese learning Skills, call typed tools, preserve learning state, require approval before replacing a plan, and record every model call's usage and cost estimate.
+
+## What this project demonstrates
+
+- A domain Runtime facade over a reusable Agent Harness instead of business logic scattered across prompts.
+- Typed tools, owner-scoped state, approval gates, idempotent effects, checkpoints, and recovery.
+- A practical split between JSON learner state, SQLite event/history state, and operational Web views.
+- Usage, pricing, retry and fallback records that keep missing cost data as `null` instead of inventing zeroes.
 
 ## What Is Implemented
 
@@ -87,6 +96,10 @@ This project uses the MIT-licensed `react-agent-harness` project at commit `c06e
 LearningLoop-specific work is the dual-provider model policy, UTF-8 Skill loading on Windows, typed learning tools, SQLite/JSON learning state, Memory Gate, FSRS integration, approval workflow, web API/UI, usage ledger, and local acceptance tests.
 
 The local profile is single-user and authentication-disabled for development. The Tencent Cloud profile enables lightweight owner isolation without public registration, organizations, OAuth, or complex RBAC. Neither profile includes RAG, MCP, vector memory, multi-agent orchestration, document upload, voice, or vision. The Web workbench separates conversation, plan, progress, review, usage, and notification views.
+
+## Safety and privacy boundary
+
+This repository is intended for a private learning workspace. Provider keys, SMTP credentials, learner data, SQLite state, notification outbox files and local traces stay in the ignored `.env`/`data/` paths. The application does not claim to be a general tutoring platform, a clinical or financial advisor, or a production multi-tenant service.
 
 ## Current Acceptance Notes
 
