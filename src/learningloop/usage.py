@@ -7,7 +7,7 @@ from typing import Any
 
 from learningloop.models import UsageData, UsageSummary
 
-PRICING_VERSION = "deepseek-official-2026-08-16"
+PRICING_VERSION = "local-provider-2026-08-16"
 PRICES = {
     "flash": {
         "offpeak": {"cache": 0.007, "miss": 0.22, "output": 0.66},

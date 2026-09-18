@@ -1,4 +1,4 @@
-"""Freeze resume-facing routing, context, and official-price metrics.
+"""Freeze resume-facing routing, context, and local price-table metrics.
 
 This benchmark spends a bounded number of real model calls. It compares prompts
 using provider-reported input tokens and calculates a counterfactual Pro-only
@@ -148,7 +148,7 @@ async def run(output: Path) -> dict[str, Any]:
         )
         settings.prepare_directories()
         if settings.deepseek_api_key is None:
-            raise RuntimeError("official DeepSeek API key is not configured")
+            raise RuntimeError("local Provider credential is not configured")
         db = Database(settings.database_path)
         gateway = ModelGateway(settings, db)
 
@@ -265,7 +265,7 @@ async def run(output: Path) -> dict[str, Any]:
             },
             "limitations": [
                 "Routing cases validate policy and JSON completion, not answer quality.",
-                "Cost is an official-price estimate, not the provider bill.",
+                "Cost is a local price-table estimate, not the provider bill.",
                 "Context reductions use provider-reported input tokens for fixed prompts.",
             ],
         }

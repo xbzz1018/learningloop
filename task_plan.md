@@ -2,7 +2,7 @@
 
 ## Goal
 
-Deliver a resume-grade personal learning assistant with a domain Agent Runtime, progressive Agent Skills, recoverable and idempotent state transitions, official DeepSeek routing, lightweight user isolation, observability, and Tencent Cloud deployment assets.
+Deliver a resume-grade personal learning assistant with a domain Agent Runtime, progressive Agent Skills, recoverable and idempotent state transitions, configurable Provider routing, lightweight user isolation, observability, and deployment assets.
 
 ## Phases
 
@@ -16,7 +16,7 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 - [x] 8. P0: package 0.3.0, offline Harness dependency, and versioned database migrations
 - [x] 9. P1: domain Runtime, run stages, checkpoint repository, and tool-effect ledger
 - [x] 10. P2: lazy Skills, code-enforced tool policy, bounded context, and authoritative memory boundary
-- [x] 11. P3: official DeepSeek pricing profiles, complete usage semantics, and optional OpenTelemetry
+- [x] 11. P3: local Provider pricing profiles, complete usage semantics, and optional OpenTelemetry
 - [x] 12. P4: lightweight account isolation and authenticated API/UI
 - [x] 13. P5: OpenAPI snapshot, UI runtime status, backup/restore, and security checks
 - [ ] 14. P6: Nginx/Tencent Cloud deployment assets, remote acceptance, and delivery documentation
@@ -24,10 +24,10 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 
 ## Locked Decisions
 
-- Official DeepSeek is primary; VibeAPI/KCNE are opt-in same-model relays.
+- The configured Provider is primary; fallback Providers are opt-in and explicit.
 - Flash is the default model; Pro is rule-routed and capped to one call per turn.
 - SQLite stores operational state; JSON files store structured learner state.
-- Search uses DeepSeek Responses web_search, then DuckDuckGo.
+- Search uses a configured provider capability, then DuckDuckGo.
 - The service has no public registration. Operators create local accounts through the CLI; all learning data is owner-scoped.
 - No RAG, vector database, MCP, Supervisor-style delegation, or general shell.
 - The current pinned agent-harness remains the shared model/tool loop for two controlled roles: Interactive and Autonomous. Hermes, DeepAgents, OpenAI Agents SDK, and Pydantic AI Harness are not runtime dependencies.
@@ -47,7 +47,7 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 
 - Offline tests: 53 passed.
 - Ruff: passed.
-- Live compatibility: Vibe Flash/Pro core chat passed; KCNE Flash core chat and web search passed; KCNE Pro returned 401.
+- Live compatibility checks are environment-specific and are not part of the public CI contract.
 - Local Web: `http://127.0.0.1:8765/` is running with the latest code.
 - Current usage ledger includes live doctor checks and two real learning flows; costs are estimated because relay actual-cost fields were unavailable.
 - Daily plan/review persistence, 08:30/20:30 SMTP scheduling, idempotent delivery records, and the date-grouped plan table are implemented.
@@ -61,15 +61,15 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 - P0-P5 implementation is complete: local wheel dependency, versioned migrations, Runtime stages, lazy Skills, owner-scoped auth, OpenAPI snapshot, optional OTel bridge, and SQLite Backup API.
 - Docker image builds without apt or GitHub clone, and the local container reports healthy after the 0.3.1 rebuild.
 - Browser review confirmed the current workbench UI: current-session-first sidebar, explicit history expansion, collapsible navigation, Runtime stage/Skill panel, cache-hit rate, and Flash/Pro usage split.
-- Official DeepSeek smoke passed for Flash and Pro: model IDs, JSON output, streaming, and usage all passed; 5 calls used 8,207 tokens with a $0.003424 official-price estimate.
+- Local Provider smoke passed for Flash and Pro: model IDs, JSON output, streaming, and usage all passed; 5 calls used 8,207 tokens with a $0.003424 local price-table estimate.
 - ActionCard execution now refreshes the workspace summary without a page reload; Runtime stage, pending actions, progress and today's task preview are updated from the state API.
 - Repeated ActionCard decisions are idempotent and return the stored action state. The browser flow was rechecked against a real approved plan and the generated date-grouped plan table.
 - Final local acceptance after the UI/runtime fixes: 46 tests passed and the Compose container is healthy.
 - 0.3.1 detailed-content and task-result changes are covered by 53 passing tests; the OpenAPI snapshot now contains 35 paths.
-- The live Docker Flash smoke completed a normal ReAct tool loop in a new session: `completed`, 1 call, 1,226 tokens, official-price estimate `$0.00038208`.
+- The live Docker Flash smoke completed a normal ReAct tool loop in a new session: `completed`, 1 call, 1,226 tokens, local price-table estimate `$0.00038208`.
 - The same smoke window contains no `a coroutine was expected` or `stream crashed` errors. Task details, start state, result modal, mastery/error and deterministic review were verified in the browser.
 - Functional Evaluation V1 passed 10/10 deterministic scenarios. Final structured artifacts, recovery, state integrity and idempotency each passed 100%; these are functional metrics, not model-quality or production-load results.
-- Tencent Cloud HTTPS and public health check passed on `https://learningloop.43-131-243-184.nip.io`; admin-account, backup/restore and restart acceptance remain.
+- Remote HTTPS and public health checks remain deployment-specific; admin-account, backup/restore and restart acceptance remain.
 
 ### 双平面 Agent 增强
 
@@ -77,7 +77,7 @@ Deliver a resume-grade personal learning assistant with a domain Agent Runtime, 
 - [x] 定时计划和复盘通过 Autonomous Agent 入口运行，保留旧 DailyLearningService 注入兼容。
 - [x] 新增 Run Trace、Agent 状态和结构化产物 API，并更新 OpenAPI 快照。
 - [x] 新增角色、产物、调度入口和 Trace 回归测试；当前离线测试为 58 项。
-- [x] 指标测量：冻结 10 个路由场景和 3 组上下文对照；Flash 占比 80%，Skill/历史/摘要输入 Token 分别减少 74.28%/57.82%/95.34%，混合路由相对 Pro-only 官方价格估算降低 33.07%。
+- [x] 指标测量：冻结 10 个路由场景和 3 组上下文对照；Flash 占比 80%，Skill/历史/摘要输入 Token 分别减少 74.28%/57.82%/95.34%，混合路由相对 Pro-only 本地价格估算降低 33.07%。
 
 ## Error Log
 

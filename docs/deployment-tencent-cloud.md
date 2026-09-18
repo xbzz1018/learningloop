@@ -15,7 +15,7 @@
 
 ## 2. 配置
 
-复制 `.env.example` 为 `.env`，填写官方 DeepSeek Key、SMTP（可选）和：
+复制 `.env.example` 为 `.env`，填写本地 Provider 地址、凭据、SMTP（可选）和：
 
 ```text
 LEARNINGLOOP_DOMAIN=learn.example.com
@@ -25,7 +25,7 @@ LEARNINGLOOP_AUTH_COOKIE_SECURE=true
 
 密钥只通过服务器环境变量注入，不写入镜像、日志、SQLite 或前端。
 
-当前验收实例：`https://learningloop.43-131-243-184.nip.io`。正式域名应新增 DNS A 记录后替换该地址。
+公开仓库不记录部署域名。部署时使用自有域名或内网入口，并将其写入服务器配置，不写入 Git。
 
 ## 3. 启动和创建账号
 
@@ -60,13 +60,13 @@ docker compose -f docker-compose.tencent.yml up -d app
 - 两个账号只能看到自己的会话、计划、通知和用量；
 - 容器重启后会话、ActionCard、Checkpoint 和学习状态仍在；
 - `/health` 返回 `0.3.1` 和脱敏 Provider 状态；
-- 官方 API 调用、Token、缓存和费用估算能在用量页复算；
+- 配置的 Provider 调用、Token、缓存和费用估算能在用量页复算；
 - SMTP 失败不会回滚学习状态。
 
 已完成的远程验收：
 
-- `/opt/learningloop/current` 已部署固定版本代码；
-- Docker 镜像在服务器构建成功，容器绑定 `127.0.0.1:8765`；
+- 固定版本代码已部署到服务器；
+- Docker 镜像在服务器构建成功，容器仅绑定本机端口；
 - Nginx 配置检查通过并已反向代理；
 - Let's Encrypt 证书签发成功，HTTPS 公网访问和 `/health` 均返回 `0.3.1`；
 - 管理员账号创建、登录隔离、SQLite 备份/恢复和重启恢复需完成最后远程验收。

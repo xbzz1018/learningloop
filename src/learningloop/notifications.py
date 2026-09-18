@@ -16,7 +16,7 @@ class MailDeliveryError(RuntimeError):
 
 
 class MailService:
-    """SMTP sender adapted from OnCallAgent, with a safe local outbox for development."""
+    """SMTP sender with a safe local outbox for development."""
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings

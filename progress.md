@@ -2,12 +2,12 @@
 
 ## 2026-08-31
 
-- Created `F:\code\homework\project\learningloop` as an independent Git repository.
+- Created LearningLoop as an independent Git repository.
 - Created Conda environment `learningloop` with Python 3.12.
 - Added package metadata, environment declaration, secret-safe example configuration, and persistent planning files.
 - Implementation is in phase 2: configuration, persistence, provider routing, and usage accounting.
 - Offline suite passes 22 tests; Ruff passes.
-- Official DeepSeek was added as the production-first provider. Relay providers remain opt-in fallback and are not silently selected.
+- A configurable Provider profile was added as the primary route. Fallback providers remain opt-in and are not silently selected.
 - Deterministic planning flow now validates `CoursePlan` once and always creates an approval request; approved plans alone are persisted.
 - Real end-to-end checks: one Flash goal-intake run and one Pro deep-plan run completed. The Pro run used one call, 2,309 tokens, and generated six stages; course state changed only after approval.
 - Browser QA passed desktop layout, mobile 390px no-overflow, new-session creation, SSE completion refresh, and usage panel.
@@ -18,7 +18,7 @@
 
 - Added `DailyPlan` and `DailyReview` schemas with deterministic scheduling constraints and model-assisted summaries.
 - Added SQLite daily plan, review, notification settings and delivery tables with an idempotency key per session/date/type.
-- Added SMTP/local-outbox notification service adapted from the existing OnCallAgent mail configuration pattern.
+- Added SMTP/local-outbox notification service with an isolated mail configuration.
 - Added an in-process single-worker scheduler: daily plan at 08:30 and review at 20:30 in Asia/Shanghai, six-hour catch-up window, retry/backoff and skip recording.
 - Added plan-table UI with date grouping, completion percentage, status chips and stage completion actions.
 - Added notification and daily-plan APIs, CLI commands, Dockerfile, Compose and notification documentation.
@@ -48,16 +48,16 @@
 ## 2026-09-02
 
 - Started the 0.3.0 resume-grade upgrade after reconciling the approved plan with the current implementation.
-- Locked the architecture to one pinned agent-harness loop, a thin LearningLoop Runtime facade, authoritative SQLite/JSON state, official DeepSeek production routes, optional OpenTelemetry, and lightweight account isolation.
+- Locked the architecture to one pinned agent-harness loop, a thin LearningLoop Runtime facade, authoritative SQLite/JSON state, configurable Provider routes, optional OpenTelemetry, and lightweight account isolation.
 - Confirmed that existing Enter handling, session actions, SSE cursor reconnect, ActionCards, and local Docker wheel packaging must be preserved rather than rebuilt.
 - P0-P2 completed: package version 0.3.0, local Harness wheel resolution, versioned schema migrations, domain Runtime stages, tool-effect ledger, lazy Skill activation, code-owned tool policy, and bounded ContextBuilder.
-- P3 completed in code: official DeepSeek remains the production profile, usage/cache semantics are preserved, and OpenTelemetry model spans are optional and fail closed when extras are absent.
+- P3 completed in code: the configurable Provider profile preserves usage/cache semantics, and OpenTelemetry model spans are optional and fail closed when extras are absent.
 - P4 completed: Argon2id-backed local accounts, cookie sessions, owner-scoped session/action/usage APIs, login page, logout, and cross-user isolation tests.
 - P5 completed: OpenAPI 3.1 snapshot, SQLite Backup API CLI, Caddyfile, Tencent Cloud Compose, security/recovery/deployment documentation, and 44 offline tests.
 - Docker no longer invokes apt or GitHub during the build. The image rebuilt successfully, the Compose container is healthy, and an in-container backup passed `integrity_check`.
 - P6 remains pending only for real Tencent Cloud DNS/HTTPS/backup acceptance; no server connection was attempted without a domain and SSH authorization.
-- Official DeepSeek smoke (isolated data directory) passed for Flash and Pro: model list, JSON output, streaming, usage and actual model IDs all matched. The smoke used 5 billable calls, 8,207 total tokens, and an official-price estimate of $0.00342444.
-- The local `.env` now contains the official key without exposing it in repository files or logs; the running local container reports both official routes configured.
+- Local Provider smoke (isolated data directory) passed for Flash and Pro: model list, JSON output, streaming, usage and actual model IDs all matched. The smoke used 5 billable calls, 8,207 total tokens, and a local price-table estimate of $0.00342444.
+- The local `.env` is used only for private smoke checks; no credential is exposed in repository files or logs.
 - `pip-audit` identified and was resolved for pytest 8.4.2 -> 9.0.3, but the follow-up audit could not reach PyPI because of a transient TLS EOF; no vulnerability result is claimed for the complete lock until that audit is rerun.
 - Final local validation: 45 tests passed, Ruff passed, scoped Pyright passed, `pip check` passed, OpenAPI snapshot parsed, official smoke data is isolated, Docker builds without apt/GitHub access, the container is healthy, and the application user can write `/data`.
 - Refined the visible workbench after browser review: current session is shown by default, history sessions are explicitly expandable, the navigation rail can be collapsed, Runtime stage/Skill are visible in the context panel, and usage now shows cache-hit rate plus Flash/Pro distribution.
@@ -99,10 +99,10 @@
 - Added Agent Artifact Pydantic validation, role-specific tool/Skill matrices, runtime role metadata, dynamic role display in the workbench, and the metrics measurement module.
 - Final regression: 58 pytest cases passed, Ruff passed, scoped Pyright reported 0 errors, `pip check` passed, JavaScript syntax passed, OpenAPI contract passed, and Docker Compose rebuilt with a healthy `0.3.1` container.
 - User-confirmed real SMTP test delivery succeeded; the resume may state that SMTP delivery was verified, but no delivery-rate percentage is claimed.
-- Added and executed Resume Metrics V1 against official DeepSeek: 16 calls measured progressive Skill loading, bounded context, summary compression and frozen routing cases.
+- Added and executed Resume Metrics V1 against the local Provider profile: 16 calls measured progressive Skill loading, bounded context, summary compression and frozen routing cases.
 - Verified results: 74.28% Skill input-token reduction, 57.82% bounded-history reduction, 95.34% summary reduction, 80% Flash share and 33.07% estimated cost reduction versus counterfactual Pro-only pricing.
 - Tencent Cloud deployment remains blocked because the only discovered host (`43.131.243.184`) times out during SSH banner exchange and no `learn.xbzz.cloud` DNS record exists.
 - Confirmed Tencent Cloud server `43.131.243.184` with Ubuntu 22.04, Docker 29.1.3 and Compose 2.40.3; existing Nginx owns ports 80/443 and existing OpsPilot/Sub2API containers were preserved.
 - Deployed fixed source release `6055990` to `/opt/learningloop/current`, built and started a separate LearningLoop container on `127.0.0.1:8765`.
-- Added Nginx reverse proxy for `learningloop.43-131-243-184.nip.io`; Certbot issued a Let's Encrypt certificate valid until 2026-12-01.
+- Added an Nginx reverse proxy for the deployment domain; Certbot issued a Let's Encrypt certificate.
 - Public HTTPS `/health` returns `0.3.1`; admin account creation, login flow, backup/restore and restart recovery are pending final SSH acceptance.
