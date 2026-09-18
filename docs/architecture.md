@@ -13,7 +13,7 @@ FastAPI + SSE application service
             |       +--> Interactive Agent (user requests)
             |       +--> Autonomous Agent (scheduler requests)
             |       +--> ModelPolicy: Flash / Pro
-            |       +--> FallbackLLM: Official DeepSeek -> optional relay, same model only
+            |       +--> FallbackLLM: configured primary -> optional fallback, same model only
             |       +--> Typed learning tools + ActionCard HITL
             |       +--> Checkpoint / tool-effect ledger / Trace / BudgetGuard
     |

@@ -28,18 +28,18 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    vibe_base_url: str = "https://www.vibeapi.cn/v1"
+    vibe_base_url: str = "https://api.example.invalid/v1"
     vibe_flash_key: SecretStr | None = None
     vibe_pro_key: SecretStr | None = None
     vibe_flash_model: str = "deepseek-v4-flash"
     vibe_pro_model: str = "deepseek-v4-pro"
-    # 官方 DeepSeek 是生产主路由；中转站仅作为显式开启的开发备用。
-    deepseek_base_url: str = "https://api.deepseek.com"
+    # The primary and fallback providers are explicit local configuration.
+    deepseek_base_url: str = "https://api.example.invalid/v1"
     deepseek_api_key: SecretStr | None = None
     deepseek_flash_model: str = "deepseek-v4-flash"
     deepseek_pro_model: str = "deepseek-v4-pro"
     enable_relay_fallback: bool = False
-    kcne_base_url: str = "https://api.kcne.top/v1"
+    kcne_base_url: str = "https://api.example.invalid/v1"
     kcne_flash_key: SecretStr | None = None
     kcne_pro_key: SecretStr | None = None
     kcne_flash_model: str = "deepseek-v4-flash"
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     skills_dir: Path = Path("skills")
     host: str = "127.0.0.1"
     port: int = 8765
-    enable_real_models: bool = True
+    enable_real_models: bool = False
     request_timeout_seconds: float = 60.0
     turn_input_limit: int = 120_000
     turn_output_limit: int = 16_000

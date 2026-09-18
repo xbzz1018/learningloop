@@ -5,10 +5,8 @@ LearningLoop 的提醒功能是单用户、邮件优先的本地能力。默认�
 
 ## SMTP 配置
 
-`F:\code\homework\OnCallAgent\OpspilotAgent` 中的 `MailService` 提供了 SSL/STARTTLS
-配置参考。只需把 SMTP 字段以 `LEARNINGLOOP_SMTP_*` 名称写入 LearningLoop 自己的、已被
-`.gitignore` 忽略的 `.env`；不要直接加载 OnCallAgent 的完整 `.env`，不要复制验证码、认证
-或模型密钥。
+SMTP 的 SSL/STARTTLS 配置直接写入 LearningLoop 自己的、已被 `.gitignore` 忽略的 `.env`。
+不要复制其他项目的完整 `.env`，不要复制验证码、认证或模型密钥。
 
 没有配置 SMTP 时，邮件会写入 `data/notifications/outbox/`，用于离线开发和测试。
 

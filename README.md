@@ -1,5 +1,7 @@
 # LearningLoop
 
+[![Offline Tests](https://github.com/xbzz1018/learningloop/actions/workflows/offline-tests.yml/badge.svg?branch=main)](https://github.com/xbzz1018/learningloop/actions/workflows/offline-tests.yml)
+
 LearningLoop 0.3.1 is a personal learning assistant for long-running study goals. It turns a vague goal into an executable plan, guides daily work, schedules FSRS reviews, and records the evidence needed to recover after interruptions.
 
 The runtime has two controlled entrypoints: an Interactive Agent for user conversations and an Autonomous Agent for scheduled plans, reviews, and recovery. Both entrypoints load Chinese learning Skills, call typed tools, preserve learning state, require approval before replacing a plan, and record every model call's usage and cost estimate.
@@ -13,17 +15,16 @@ The runtime has two controlled entrypoints: an Interactive Agent for user conver
 
 ## What Is Implemented
 
-- DeepSeek V4 Flash is the default route; V4 Pro handles explicit or rule-detected complex planning.
-- Official DeepSeek is the production primary provider. VibeAPI/KCNE are optional same-model relays for development fallback only.
+- A locally configured OpenAI-compatible provider supplies Flash/Pro routes. No endpoint, key, or provider account is included in this public repository.
 - Five Skills: goal anchoring, course planning, daily tutoring, review coaching, and plan recovery.
 - SQLite stores sessions, messages, events, approvals, checkpoints, provider capabilities, and per-request usage.
 - JSON files store the learner profile, course plan, concept mastery, errors, and FSRS review cards.
 - The Web workspace renders a date-grouped plan table with completion percentage and stage completion actions.
 - Course stages and daily tasks contain actionable LessonUnit content: concepts, explanations, examples, exercises, expected output and acceptance criteria. Task results record answers, notes and scores, then update mastery, errors and FSRS.
 - The plan and review pages are operational workspaces rather than read-only summaries: users can expand lessons, start tasks, submit results and record reviews without writing chat commands.
-- An in-process SQLite scheduler can generate a Flash daily plan at 08:30 and a Flash evening review at 20:30, then deliver both by SMTP or a local outbox in development.
+- An in-process SQLite scheduler can generate daily plans and reviews at configured times, then deliver them by SMTP or a local outbox in development.
 - Local Web UI: `GET /`, FastAPI JSON API, SSE events, HITL approvals, and usage CSV/JSON export.
-- DeepSeek Responses `web_search` is capability-probed. DuckDuckGo is the fallback when the provider search tool is unavailable.
+- Provider search capability is probed when live mode is explicitly enabled. DuckDuckGo is the fallback when the configured provider search tool is unavailable.
 - The 0.3 runtime adds a domain Runtime facade, stage checkpoints, an idempotent tool-effect ledger, optional OpenTelemetry spans, and owner-scoped private accounts.
 - Interactive and Autonomous runs are recorded separately with structured Agent Artifacts, Trace endpoints, role-level usage aggregation, and the same Checkpoint and tool-policy boundaries.
 
@@ -85,7 +86,7 @@ For a Tencent Cloud private instance with lightweight account isolation and HTTP
 
 The application records input, cached input, cache-miss input, output, reasoning, total tokens, latency, provider alias, requested/actual model, retry/fallback status, and estimated cost for every model request. Missing usage or pricing fields remain `null`.
 
-The current official-price estimate is versioned as `deepseek-official-2026-08-16`; it is not a claim about the relay's actual bill. Use `/api/v1/usage`, `/api/v1/usage/calls`, or the CSV export to inspect and recalculate usage.
+The price table is local, versioned configuration; it is not a claim about any provider's bill. Use `/api/v1/usage`, `/api/v1/usage/calls`, or the CSV export to inspect and recalculate usage.
 
 Default safeguards are 4 model calls per turn, 120K input tokens per turn, 16K output tokens per turn, 150 calls per day, and a `$5` development cost ceiling when cost data is available.
 
@@ -101,10 +102,12 @@ The local profile is single-user and authentication-disabled for development. Th
 
 This repository is intended for a private learning workspace. Provider keys, SMTP credentials, learner data, SQLite state, notification outbox files and local traces stay in the ignored `.env`/`data/` paths. The application does not claim to be a general tutoring platform, a clinical or financial advisor, or a production multi-tenant service.
 
+## Contribution and security
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Do not put provider URLs, API keys, SMTP passwords, learner data, or local traces in Issues, Pull Requests, logs, or screenshots.
+
 ## Current Acceptance Notes
 
-The live provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supports those capabilities and Responses web search. The KCNE Pro credential currently returns HTTP 401, so it remains a configured but unavailable backup until its credential is replaced.
-
-The local service is currently available at <http://127.0.0.1:8765/>. The 0.3.1 local acceptance includes 58 offline tests, a verified real SMTP test delivery, and a live Flash ReAct smoke (1,226 tokens, official estimate `$0.00038208`). Functional Evaluation V1 passed all 10 isolated deterministic scenarios; final structured artifacts, recovery, state integrity and idempotency each passed 100%. These are functional correctness metrics, not model-quality or production-load claims. The current workspace contains local smoke data; API keys and runtime data remain ignored.
+The public CI covers the offline test suite. Live provider, SMTP, and deployment checks are opt-in and must be run only after local secrets and endpoints are configured; their results are not represented as public provider guarantees.
 
 The versioned evaluation report is stored in [`evaluations/results/functional-v1.md`](evaluations/results/functional-v1.md), with per-case details and the runner SHA-256 in the adjacent JSON file.
