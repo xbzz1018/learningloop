@@ -112,7 +112,7 @@ This repository is intended for a private learning workspace. Provider keys, SMT
 
 ## Recorded Acceptance Notes (0.3.1)
 
-The recorded local provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supported those capabilities and Responses web search. The KCNE Pro credential returned HTTP 401 in that check; rerun `learningloop doctor --live` with your own credentials before relying on a relay.
+The recorded local provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supported those capabilities and Responses web search. The KCNE Pro credential returned HTTP 401 in that check; rerun `learningloop doctor --live` with your own credentials before relying on a relay. Doctor now records authentication failures as unavailable and excludes them when rebuilding model routes. The default `doctor` command stays offline, including without keys; ordinary chat and structured output are checked separately. Restart the service after a successful live retest. Cloud acceptance remains pending; see [operations](docs/operations.md) and the [deployment checklist](docs/deployment-tencent-cloud.md).
 
 The 0.3.1 local acceptance recorded 58 offline tests, a real SMTP test delivery, and a live Flash ReAct smoke (1,226 tokens, official estimate `$0.00038208`). Functional Evaluation V1 passed all 10 isolated deterministic scenarios; final structured artifacts, recovery, state integrity and idempotency each passed 100%. These are functional correctness metrics, not model-quality or production-load claims. Start `learningloop serve` before opening the local URL in Quick Start.
 
