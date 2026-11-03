@@ -4,6 +4,15 @@ LearningLoop 0.3.1 is a personal learning assistant for long-running study goals
 
 The runtime has two controlled entrypoints: an Interactive Agent for user conversations and an Autonomous Agent for scheduled plans, reviews, and recovery. Both entrypoints load Chinese learning Skills, call typed tools, preserve learning state, require approval before replacing a plan, and record every model call's usage and cost estimate.
 
+## Start here
+
+| Goal | Read |
+| --- | --- |
+| Run the app locally | [Quick Start](#quick-start) and [operations notes](docs/operations.md) |
+| Understand state and recovery | [Architecture](docs/architecture.md) and [recovery notes](docs/recovery.md) |
+| Check the recorded offline evaluation | [Functional Evaluation V1](evaluations/results/functional-v1.md) |
+| Review deployment boundaries | [Tencent Cloud deployment](docs/deployment-tencent-cloud.md) and [safety notes](docs/security.md) |
+
 ## What this project demonstrates
 
 - A domain Runtime facade over a reusable Agent Harness instead of business logic scattered across prompts.
@@ -101,10 +110,10 @@ The local profile is single-user and authentication-disabled for development. Th
 
 This repository is intended for a private learning workspace. Provider keys, SMTP credentials, learner data, SQLite state, notification outbox files and local traces stay in the ignored `.env`/`data/` paths. The application does not claim to be a general tutoring platform, a clinical or financial advisor, or a production multi-tenant service.
 
-## Current Acceptance Notes
+## Recorded Acceptance Notes (0.3.1)
 
-The live provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supports those capabilities and Responses web search. The KCNE Pro credential currently returns HTTP 401, so it remains a configured but unavailable backup until its credential is replaced.
+The recorded local provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supported those capabilities and Responses web search. The KCNE Pro credential returned HTTP 401 in that check; rerun `learningloop doctor --live` with your own credentials before relying on a relay.
 
-The local service is currently available at <http://127.0.0.1:8765/>. The 0.3.1 local acceptance includes 58 offline tests, a verified real SMTP test delivery, and a live Flash ReAct smoke (1,226 tokens, official estimate `$0.00038208`). Functional Evaluation V1 passed all 10 isolated deterministic scenarios; final structured artifacts, recovery, state integrity and idempotency each passed 100%. These are functional correctness metrics, not model-quality or production-load claims. The current workspace contains local smoke data; API keys and runtime data remain ignored.
+The 0.3.1 local acceptance recorded 58 offline tests, a real SMTP test delivery, and a live Flash ReAct smoke (1,226 tokens, official estimate `$0.00038208`). Functional Evaluation V1 passed all 10 isolated deterministic scenarios; final structured artifacts, recovery, state integrity and idempotency each passed 100%. These are functional correctness metrics, not model-quality or production-load claims. Start `learningloop serve` before opening the local URL in Quick Start.
 
-The versioned evaluation report is stored in [`evaluations/results/functional-v1.md`](evaluations/results/functional-v1.md), with per-case details and the runner SHA-256 in the adjacent JSON file.
+The [versioned evaluation report](evaluations/results/functional-v1.md) was generated on 2026-09-02. Its adjacent JSON file contains per-case details and the runner SHA-256.
