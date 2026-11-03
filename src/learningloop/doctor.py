@@ -18,7 +18,7 @@ class CapabilityDoctor:
     def __init__(self, settings: Settings, db: Database) -> None:
         self.settings = settings
         self.db = db
-        self.gateway = ModelGateway(settings, db)
+        self.gateway = ModelGateway(settings, db, build_router=False)
         self.search = SearchService(settings, db)
 
     def configured(self) -> dict[str, Any]:
@@ -27,6 +27,7 @@ class CapabilityDoctor:
                 "configured": bool(provider.flash_key if route == "flash" else provider.pro_key),
                 "base_url": provider.base_url,
                 "model": provider.flash_model if route == "flash" else provider.pro_model,
+                "status": "not_checked" if (provider.flash_key if route == "flash" else provider.pro_key) else "missing_key",
             }
             for alias, provider in self.settings.providers.items()
             for route in ("flash", "pro")
@@ -48,10 +49,15 @@ class CapabilityDoctor:
                     "web_search_ok": False,
                     "actual_model": None,
                     "error": None,
+                    "status": "unavailable",
+                    "available": False,
+                    "web_search_status": "not_checked",
                 }
                 if key is None:
                     result["error"] = "missing_key"
+                    result["error_hint"] = "Configure a key locally, then run doctor --live again."
                     results[f"{alias}_{route.value}"] = result
+                    self._save(alias, route.value, result)
                     continue
                 client = AsyncOpenAI(
                     api_key=key.get_secret_value(),
@@ -70,18 +76,27 @@ class CapabilityDoctor:
                         call_site="doctor",
                     )
                     with call_context(context, route):
-                        response = await self.gateway.adapters[f"{alias}_{route.value}"].complete(
-                            system="Return JSON only.",
-                            messages=[{"role": "user", "content": 'Return {"ok": true}.'}],
-                            response_format={"type": "json_object"},
+                        adapter = self.gateway._build_adapter(alias, route, 0)
+                        response = await adapter.complete(
+                            system="Answer briefly.",
+                            messages=[{"role": "user", "content": "Reply OK."}],
                             reasoning_effort="low" if route == ModelRoute.FLASH else "high",
                         )
-                    parsed = json.loads(response["text"])
-                    result["chat_ok"] = bool(parsed.get("ok"))
-                    result["structured_ok"] = result["chat_ok"]
-                    usage = self.gateway.adapters[f"{alias}_{route.value}"].last_usage or {}
+                    result["chat_ok"] = bool(response["text"].strip())
+                    usage = adapter.last_usage or {}
                     result["usage_ok"] = bool(usage.get("tokens_in") is not None)
                     result["actual_model"] = usage.get("model")
+                    try:
+                        with call_context(context, route):
+                            structured = await adapter.complete(
+                                system="Return JSON only.",
+                                messages=[{"role": "user", "content": 'Return {"ok": true}.'}],
+                                response_format={"type": "json_object"},
+                                reasoning_effort="low" if route == ModelRoute.FLASH else "high",
+                            )
+                        result["structured_ok"] = json.loads(structured["text"]).get("ok") is True
+                    except Exception as structured_exc:  # noqa: BLE001
+                        result["error"] = self._error_code(structured_exc, "structured")
                     chunks: list[str] = []
                     with call_context(context, route):
                         async for chunk in self.gateway.adapters[
@@ -103,13 +118,33 @@ class CapabilityDoctor:
                             )
                             result["responses_ok"] = True
                             result["web_search_ok"] = bool(search_response["sources"])
+                            result["web_search_status"] = "available" if result["web_search_ok"] else "unavailable"
                         except Exception as search_exc:  # noqa: BLE001
-                            result["error"] = f"web_search:{type(search_exc).__name__}"
+                            result["web_search_status"] = "unavailable"
+                            if result["error"] not in {"AuthenticationError", "PermissionDeniedError"}:
+                                result["error"] = f"web_search:{type(search_exc).__name__}"
                 except Exception as exc:  # noqa: BLE001
-                    result["error"] = type(exc).__name__
+                    result["error"] = self._error_code(exc, "provider")
+                finally:
+                    await client.close()
+                if result["error"] in {"AuthenticationError", "PermissionDeniedError"}:
+                    result["error_hint"] = "Check the key and model permissions locally, rerun doctor --live, then restart the service."
+                result["available"] = result["chat_ok"] and result["error"] not in {
+                    "AuthenticationError", "PermissionDeniedError"
+                }
+                result["status"] = "available" if result["available"] else "unavailable"
                 results[f"{alias}_{route.value}"] = result
                 self._save(alias, route.value, result)
         return results
+
+    @staticmethod
+    def _error_code(exc: Exception, stage: str) -> str:
+        # Never persist provider response bodies, URLs with query strings or credentials.
+        if getattr(exc, "status_code", None) == 401 or type(exc).__name__ == "AuthenticationError":
+            return "AuthenticationError"
+        if getattr(exc, "status_code", None) == 403 or type(exc).__name__ == "PermissionDeniedError":
+            return "PermissionDeniedError"
+        return f"{stage}:{type(exc).__name__}"
 
     def _save(self, alias: str, route: str, result: dict[str, Any]) -> None:
         self.db.execute(
@@ -122,7 +157,7 @@ class CapabilityDoctor:
                 route,
                 int(result["models_ok"]),
                 int(result["chat_ok"]),
-                int(result["chat_ok"] and result["structured_ok"]),
+                0,  # Tool calling is not probed by this doctor.
                 int(result["structured_ok"]),
                 int(result["streaming_ok"]),
                 int(result["usage_ok"]),

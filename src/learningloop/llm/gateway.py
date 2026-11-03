@@ -380,13 +380,13 @@ class ModelPolicy:
 
 
 class ModelGateway:
-    def __init__(self, settings: Settings, db: Database) -> None:
+    def __init__(self, settings: Settings, db: Database, *, build_router: bool = True) -> None:
         self.settings = settings
         self.db = db
         self.policy = ModelPolicy()
         self.telemetry = Telemetry(settings)
         self.adapters: dict[str, AuditedLLM] = {}
-        self.llm = self._build_router()
+        self.llm = self._build_router() if build_router else None
 
     def _build_adapter(
         self, provider_alias: str, route: ModelRoute, retry_index: int
@@ -427,6 +427,14 @@ class ModelGateway:
             provider = self.settings.providers[alias]
             key = provider.flash_key if route == ModelRoute.FLASH else provider.pro_key
             if key is not None:
+                capability = self.db.fetch_one(
+                    "SELECT error FROM provider_capabilities WHERE provider_alias=? AND model_route=?",
+                    (alias, route.value),
+                )
+                if capability and capability["error"] in {
+                    "AuthenticationError", "PermissionDeniedError", "missing_key"
+                }:
+                    continue
                 configured.append(alias)
         if "official" in configured and not self.settings.enable_relay_fallback:
             return ["official"]
