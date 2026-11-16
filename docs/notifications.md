@@ -1,40 +1,37 @@
 # 定时学习提醒
 
-LearningLoop 的提醒功能是单用户、邮件优先的本地能力。默认在 `Asia/Shanghai` 时区每天
-08:30 生成并发送今日学习计划，20:30 生成并发送当日复盘。
+[返回首页](../README.md)
 
-## SMTP 配置
+服务运行期间，调度器按会话设置发送今日计划和晚间复盘。默认时区为 `Asia/Shanghai`，时间分别为 08:30 和 20:30。
 
-`F:\code\homework\OnCallAgent\OpspilotAgent` 中的 `MailService` 提供了 SSL/STARTTLS
-配置参考。只需把 SMTP 字段以 `LEARNINGLOOP_SMTP_*` 名称写入 LearningLoop 自己的、已被
-`.gitignore` 忽略的 `.env`；不要直接加载 OnCallAgent 的完整 `.env`，不要复制验证码、认证
-或模型密钥。
+## 配置 SMTP
 
-没有配置 SMTP 时，邮件会写入 `data/notifications/outbox/`，用于离线开发和测试。
+在项目自己的 `.env` 中填写以下参数，重启服务后生效：
 
-## 配置会话
+| 参数 | 用途 |
+| --- | --- |
+| `LEARNINGLOOP_SMTP_HOST` | 邮件服务地址 |
+| `LEARNINGLOOP_SMTP_PORT` | 端口，默认 `465` |
+| `LEARNINGLOOP_SMTP_USERNAME` | SMTP 用户名 |
+| `LEARNINGLOOP_SMTP_PASSWORD` | SMTP 密码或授权码 |
+| `LEARNINGLOOP_SMTP_SENDER` | 发件人地址 |
+| `LEARNINGLOOP_SMTP_USE_SSL` | 默认 `true`；用于 SSL 连接 |
+| `LEARNINGLOOP_SMTP_USE_TLS` | 默认 `false`；使用 STARTTLS 时改为 `true`，同时关闭 SSL 并修改端口 |
 
-```powershell
-$body = @{ email = "learner@example.com"; enabled = $true; timezone = "Asia/Shanghai"; morning_time = "08:30"; evening_time = "20:30" } | ConvertTo-Json
-Invoke-RestMethod -Method Put -Uri "http://127.0.0.1:8765/api/v1/notifications/settings/<session-id>" -ContentType "application/json" -Body $body
-```
+未配置 SMTP 时，消息写入 `data/notifications/outbox/`，便于查看生成内容。
 
-测试发送：
+## 启用会话提醒
 
-```powershell
-learningloop notifications test --session-id <session-id>
-```
+先创建学习会话，在「通知设置」填写收件邮箱、时区、早间计划时间与晚间复盘时间。勾选「启用定时邮件」并保存，再点击「发送测试邮件」检查投递。
 
-手动运行到期任务（仍受幂等键保护）：
+调度器每 30 秒检查到期提醒。同一会话、日期和提醒类型只投递一次；失败最多尝试 3 次，投递记录显示在通知页面。服务重启后可补发 6 小时内的到期任务。
+
+## 手动运行
+
+从仓库根目录、已激活的项目环境运行：
 
 ```powershell
 learningloop notifications run-once --force
 ```
 
-## 调度保证
-
-- 调度器运行在单容器、单 Worker 的 FastAPI 生命周期中，每 30 秒检查一次。
-- `session_id + local_date + schedule_type` 是唯一幂等键，同一提醒不会重复发送。
-- 发送失败最多重试 3 次并记录错误类型，不影响学习状态保存。
-- 服务重启后允许补发 6 小时内的任务，过期任务标记为 `skipped`。
-- 短信、验证码网站自动化和公网通知服务不在首版范围内。
+该命令立即检查并执行已启用会话的提醒，生成计划或复盘时可能调用模型。已有投递记录的同一提醒不会重复发送。
