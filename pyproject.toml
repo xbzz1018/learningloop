@@ -8,6 +8,7 @@ version = "0.3.1"
 description = "A stateful personal learning assistant built on an Agent Harness and Agent Skills."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
 dependencies = [
     "argon2-cffi>=25.1,<26",
     "ddgs>=9.5,<10",

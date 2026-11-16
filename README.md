@@ -86,3 +86,7 @@ python -m pytest -q
 ```
 
 技术栈：Python、FastAPI、Agent Harness、Pydantic、SQLite、FSRS。
+
+## 许可证
+
+项目代码采用 [MIT](LICENSE)，随附组件保留各自许可证。
