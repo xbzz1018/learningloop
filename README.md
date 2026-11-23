@@ -1,119 +1,92 @@
 # LearningLoop
 
-LearningLoop 0.3.1 is a personal learning assistant for long-running study goals. It turns a vague goal into an executable plan, guides daily work, schedules FSRS reviews, and records the evidence needed to recover after interruptions.
+把长期学习目标拆成每日任务，并把练习反馈接回复习计划。LearningLoop 围绕目标确认、课程规划、每日辅导和 FSRS 间隔复习保存学习状态，中断后可以继续。
 
-The runtime has two controlled entrypoints: an Interactive Agent for user conversations and an Autonomous Agent for scheduled plans, reviews, and recovery. Both entrypoints load Chinese learning Skills, call typed tools, preserve learning state, require approval before replacing a plan, and record every model call's usage and cost estimate.
+[本地启动](#本地启动) · [系统架构](docs/architecture.md) · [定时提醒](docs/notifications.md) · [运行命令](docs/operations.md)
 
-## Start here
+## 主要功能
 
-| Goal | Read |
+| 功能 | 做什么 |
 | --- | --- |
-| Run the app locally | [Quick Start](#quick-start) and [operations notes](docs/operations.md) |
-| Understand state and recovery | [Architecture](docs/architecture.md) and [recovery notes](docs/recovery.md) |
-| Check the recorded offline evaluation | [Functional Evaluation V1](evaluations/results/functional-v1.md) |
-| Review deployment boundaries | [Tencent Cloud deployment](docs/deployment-tencent-cloud.md) and [safety notes](docs/security.md) |
+| 目标与课程计划 | 结合基础、目标、学习周期和可用时间生成课程，确认后采用 |
+| 每日学习 | 按日期查看任务，展开概念、示例和练习，提交答案、笔记与评分 |
+| 复习与调整 | 根据练习结果更新掌握情况、错题和 FSRS 复习卡，支持延期后的计划恢复 |
+| 用量查看 | 按会话与模型查看 Token、耗时和费用估算，支持 CSV / JSON 导出 |
+| 定时提醒 | 发送今日计划与晚间复盘，可在页面设置邮箱、时区和时间 |
 
-## What this project demonstrates
+## 学习流程
 
-- A domain Runtime facade over a reusable Agent Harness instead of business logic scattered across prompts.
-- Typed tools, owner-scoped state, approval gates, idempotent effects, checkpoints, and recovery.
-- A practical split between JSON learner state, SQLite event/history state, and operational Web views.
-- Usage, pricing, retry and fallback records that keep missing cost data as `null` instead of inventing zeroes.
+```mermaid
+flowchart LR
+    A["确认目标与可用时间"] --> B["制定并确认课程"]
+    B --> C["每日练习与反馈"]
+    C --> D["间隔复习与计划调整"]
+```
 
-## What Is Implemented
+对话与定时任务共用学习 Runtime。五类 Skill 分别处理目标确认、课程规划、每日辅导、复习和计划恢复；类型化工具读写学习状态，替换计划等操作需要确认。
 
-- DeepSeek V4 Flash is the default route; V4 Pro handles explicit or rule-detected complex planning.
-- Official DeepSeek is the production primary provider. VibeAPI/KCNE are optional same-model relays for development fallback only.
-- Five Skills: goal anchoring, course planning, daily tutoring, review coaching, and plan recovery.
-- SQLite stores sessions, messages, events, approvals, checkpoints, provider capabilities, and per-request usage.
-- JSON files store the learner profile, course plan, concept mastery, errors, and FSRS review cards.
-- The Web workspace renders a date-grouped plan table with completion percentage and stage completion actions.
-- Course stages and daily tasks contain actionable LessonUnit content: concepts, explanations, examples, exercises, expected output and acceptance criteria. Task results record answers, notes and scores, then update mastery, errors and FSRS.
-- The plan and review pages are operational workspaces rather than read-only summaries: users can expand lessons, start tasks, submit results and record reviews without writing chat commands.
-- An in-process SQLite scheduler can generate a Flash daily plan at 08:30 and a Flash evening review at 20:30, then deliver both by SMTP or a local outbox in development.
-- Local Web UI: `GET /`, FastAPI JSON API, SSE events, HITL approvals, and usage CSV/JSON export.
-- DeepSeek Responses `web_search` is capability-probed. DuckDuckGo is the fallback when the provider search tool is unavailable.
-- The 0.3 runtime adds a domain Runtime facade, stage checkpoints, an idempotent tool-effect ledger, optional OpenTelemetry spans, and owner-scoped private accounts.
-- Interactive and Autonomous runs are recorded separately with structured Agent Artifacts, Trace endpoints, role-level usage aggregation, and the same Checkpoint and tool-policy boundaries.
+SQLite 保存会话、事件、审批和模型调用记录，JSON 工作区保存课程、掌握情况、错题与复习卡。Checkpoint 与工具执行记录支持中断恢复，并避免恢复时重复执行已完成的操作。
 
-## Quick Start
+## 本地启动
+
+需要 Python 3.12；以下使用 Conda：
 
 ```powershell
+git clone https://github.com/xbzz1018/learningloop.git
+cd learningloop
 conda env create -f environment.yml
 conda activate learningloop
 python -m pip install -r requirements.lock
-python -m pip install -e ".[dev]" --no-deps
-# Optional quality gates/OTLP: pip install -r requirements.dev.lock -r requirements.observability.lock
+python -m pip install -e . --no-deps
 Copy-Item .env.example .env
-# Fill the four keys in .env locally. Never commit this file.
+```
+
+编辑 `.env`。默认使用官方 DeepSeek，只需填写 `LEARNINGLOOP_DEEPSEEK_API_KEY`；Flash 处理日常辅导，Pro 用于复杂规划。
+
+| 参数 | 默认值 / 用途 |
+| --- | --- |
+| `LEARNINGLOOP_DEEPSEEK_API_KEY` | 官方服务 Key |
+| `LEARNINGLOOP_DEEPSEEK_BASE_URL` | `https://api.deepseek.com` |
+| `LEARNINGLOOP_DEEPSEEK_FLASH_MODEL` | `deepseek-v4-flash` |
+| `LEARNINGLOOP_DEEPSEEK_PRO_MODEL` | `deepseek-v4-pro` |
+| `LEARNINGLOOP_DATA_DIR` | `./data`，学习状态与运行记录目录 |
+| `LEARNINGLOOP_PORT` | `8765`，本机服务端口 |
+
+```powershell
 learningloop doctor
 learningloop serve
 ```
 
-Open <http://127.0.0.1:8765/>.
+打开 <http://127.0.0.1:8765/>。`doctor` 检查当前配置，不调用模型；真实模型兼容性检查使用 `learningloop doctor --live`。
 
-Run the bounded compatibility checks only when you explicitly want to spend API tokens:
+## 第一次学习
 
-```powershell
-learningloop doctor --live
-```
+1. 新建学习会话，说明目标，例如“我有 Python 基础，希望用四周学习 SQL，每天半小时”。
+2. 补充当前基础、目标成果与时间安排，确认课程计划。
+3. 在「今日计划」展开任务，学习示例、完成练习并记录答案与评分。
+4. 在「复习中心」处理到期卡片，在「课程进度」查看掌握情况并继续下一阶段。
 
-### Daily email reminders
+需要邮件时，在 `.env` 配置 SMTP，再到「通知设置」保存邮箱并启用提醒。默认每天 08:30 发送计划、20:30 发送复盘，时区为 `Asia/Shanghai`；服务运行期间执行调度。配置方法见[定时提醒](docs/notifications.md)。
 
-Configure the `LEARNINGLOOP_SMTP_*` values in the ignored `.env`, create a session, and save
-notification settings through `PUT /api/v1/notifications/settings/{session_id}`. The default
-schedule is 08:30 for today's plan and 20:30 for the daily review in `Asia/Shanghai`.
+## 常用命令与实现
 
-For local testing without SMTP, leave the SMTP values empty and run:
+| 内容 | 入口 |
+| --- | --- |
+| 课程、任务与复习状态 | [learning](src/learningloop/learning/) |
+| Agent 运行与模型策略 | [Runtime](src/learningloop/agent/runtime.py)、[Policy](src/learningloop/agent/policy.py) |
+| Web 页面与 API | [Web](src/learningloop/web/)、[接口说明](docs/api.md) |
+| 备份与恢复 | [运行命令](docs/operations.md)、[恢复说明](docs/recovery.md) |
+| Docker 与私有账号 | [本机 Compose](docker-compose.yml)、[部署说明](docs/deployment-tencent-cloud.md) |
 
-```powershell
-learningloop notifications run-once --force
-```
-
-Messages are written to `data/notifications/outbox/`. The same command is safe to repeat because
-each session/date/notification type has an idempotency key.
-
-See [`docs/notifications.md`](docs/notifications.md) for the SMTP mapping and recovery behavior.
-
-### Docker
-
-The local service is intentionally a single-container, single-worker deployment so the SQLite scheduler
-cannot run duplicate jobs:
+运行离线测试：
 
 ```powershell
-docker compose up -d --build
+python -m pip install -r requirements.dev.lock
+python -m pytest -q
 ```
 
-The container stores the database, learning state, traces and notification outbox in `/data`.
+技术栈：Python、FastAPI、Agent Harness、Pydantic、SQLite、FSRS。
 
-For a Tencent Cloud private instance with lightweight account isolation and HTTPS, see
-[`docs/deployment-tencent-cloud.md`](docs/deployment-tencent-cloud.md) and run
-`docker-compose.tencent.yml` with a domain configured in `.env`.
+## 许可证
 
-## Model And Cost Policy
-
-The application records input, cached input, cache-miss input, output, reasoning, total tokens, latency, provider alias, requested/actual model, retry/fallback status, and estimated cost for every model request. Missing usage or pricing fields remain `null`.
-
-The current official-price estimate is versioned as `deepseek-official-2026-08-16`; it is not a claim about the relay's actual bill. Use `/api/v1/usage`, `/api/v1/usage/calls`, or the CSV export to inspect and recalculate usage.
-
-Default safeguards are 4 model calls per turn, 120K input tokens per turn, 16K output tokens per turn, 150 calls per day, and a `$5` development cost ceiling when cost data is available.
-
-## Attribution And Scope
-
-This project uses the MIT-licensed `react-agent-harness` project at commit `c06e0a9ebbbd50543dbf6463201ac07887d5e03e` for the generic runtime and the MIT-licensed `learn-anything-skill` project at commit `2886af46b67bcdf5e73e085307d0e8747b47090d` for learning workflow references. Their license texts are preserved under `third_party/`.
-
-LearningLoop-specific work is the dual-provider model policy, UTF-8 Skill loading on Windows, typed learning tools, SQLite/JSON learning state, Memory Gate, FSRS integration, approval workflow, web API/UI, usage ledger, and local acceptance tests.
-
-The local profile is single-user and authentication-disabled for development. The Tencent Cloud profile enables lightweight owner isolation without public registration, organizations, OAuth, or complex RBAC. Neither profile includes RAG, MCP, vector memory, multi-agent orchestration, document upload, voice, or vision. The Web workbench separates conversation, plan, progress, review, usage, and notification views.
-
-## Safety and privacy boundary
-
-This repository is intended for a private learning workspace. Provider keys, SMTP credentials, learner data, SQLite state, notification outbox files and local traces stay in the ignored `.env`/`data/` paths. The application does not claim to be a general tutoring platform, a clinical or financial advisor, or a production multi-tenant service.
-
-## Recorded Acceptance Notes (0.3.1)
-
-The recorded local provider check found that Vibe Flash/Pro support chat, structured output, streaming, and usage. KCNE Flash supported those capabilities and Responses web search. The KCNE Pro credential returned HTTP 401 in that check; rerun `learningloop doctor --live` with your own credentials before relying on a relay. Doctor now records authentication failures as unavailable and excludes them when rebuilding model routes. The default `doctor` command stays offline, including without keys; ordinary chat and structured output are checked separately. Restart the service after a successful live retest. Cloud acceptance remains pending; see [operations](docs/operations.md) and the [deployment checklist](docs/deployment-tencent-cloud.md).
-
-The 0.3.1 local acceptance recorded 58 offline tests, a real SMTP test delivery, and a live Flash ReAct smoke (1,226 tokens, official estimate `$0.00038208`). Functional Evaluation V1 passed all 10 isolated deterministic scenarios; final structured artifacts, recovery, state integrity and idempotency each passed 100%. These are functional correctness metrics, not model-quality or production-load claims. Start `learningloop serve` before opening the local URL in Quick Start.
-
-The [versioned evaluation report](evaluations/results/functional-v1.md) was generated on 2026-09-02. Its adjacent JSON file contains per-case details and the runner SHA-256.
+项目代码采用 [MIT](LICENSE)，随附组件保留各自许可证。
