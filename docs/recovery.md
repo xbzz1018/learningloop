@@ -12,9 +12,18 @@
 
 ## SQLite 备份
 
+创建备份时给文件名加上时间，避免覆盖上一份。
+
 ```powershell
-learningloop backup create --output data/backups/learningloop.db
-learningloop backup restore --input data/backups/learningloop.db --confirm
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$backupFile = "data/backups/learningloop-$stamp.db"
+learningloop backup create --output $backupFile
 ```
 
-恢复命令要求显式 `--confirm`，并在写入后执行 `PRAGMA integrity_check`。生产环境恢复前先停止应用容器。
+命令返回备份路径和 `integrity` 检查结果。恢复前先停止正在使用该数据库的 `learningloop serve` 进程或应用容器，再把 `$backupFile` 设为要恢复的文件路径。
+
+```powershell
+learningloop backup restore --input $backupFile --confirm
+```
+
+恢复会覆盖当前配置的数据目录中的 `learningloop.db`，写入后执行 `PRAGMA integrity_check`。确认结果为 `ok` 后再启动服务。
