@@ -432,7 +432,7 @@ class ModelGateway:
                     (alias, route.value),
                 )
                 if capability and capability["error"] in {
-                    "AuthenticationError", "PermissionDeniedError", "missing_key"
+                    "AuthenticationError", "PermissionDeniedError"
                 }:
                     continue
                 configured.append(alias)

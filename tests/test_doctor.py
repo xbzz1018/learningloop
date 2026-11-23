@@ -37,6 +37,9 @@ async def test_live_without_keys_persists_unavailable_without_network(settings, 
     assert all(not value["available"] and value["error"] == "missing_key" for value in result.values())
     rows = db.fetch_all("SELECT error,chat_ok FROM provider_capabilities")
     assert len(rows) == 6
+    assert ModelGateway(no_keys(settings), db, build_router=False)._candidate_aliases(ModelRoute.FLASH) == []
+    gateway = ModelGateway(settings, db, build_router=False)
+    assert gateway._candidate_aliases(ModelRoute.FLASH) == ["vibe", "kcne"]
     assert all(row["error"] == "missing_key" and row["chat_ok"] == 0 for row in rows)
 
 
@@ -46,7 +49,7 @@ def saved_result(error):
             "web_search_ok": False, "actual_model": "fake", "error": error}
 
 
-@pytest.mark.parametrize("error", ["AuthenticationError", "PermissionDeniedError", "missing_key"])
+@pytest.mark.parametrize("error", ["AuthenticationError", "PermissionDeniedError"])
 def test_known_auth_failure_excluded_and_successful_retest_restores(settings, db, error):
     doctor = CapabilityDoctor(settings, db)
     doctor._save("kcne", "pro", saved_result(error))
