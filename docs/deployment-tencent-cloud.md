@@ -70,3 +70,21 @@ docker compose -f docker-compose.tencent.yml up -d app
 - Nginx 配置检查通过并已反向代理；
 - Let's Encrypt 证书签发成功，HTTPS 公网访问和 `/health` 均返回 `0.3.1`；
 - 管理员账号创建、登录隔离、SQLite 备份/恢复和重启恢复需完成最后远程验收。
+
+## 6. Provider 与远程验收记录模板
+
+先执行无网络诊断 `learningloop doctor`。在服务器通过本地环境注入密钥后，显式执行
+`learningloop doctor --live`（会产生模型用量），保存脱敏结果；不要复制密钥或异常响应原文。
+若 KCNE Pro 返回 401，结果应为 `error=AuthenticationError`、`available=false`；
+该 Provider 会从后续新建路由中排除。更新密钥并成功复测后重启服务，才能恢复路由。
+
+| 项目 | 状态 | 脱敏证据 |
+| --- | --- | --- |
+| 源码 SHA、镜像摘要、验收时间 | pending | 固定版本与时间 |
+| official/vibe/kcne × flash/pro 能力矩阵 | pending | chat/structured/streaming/usage/web_search 各项布尔值及错误类别 |
+| KCNE Pro 401 排除与复测 | pending | 不可用标记、重建路由后的候选；不记录 Key |
+| DNS/HTTPS 与健康检查 | pending | 域名、证书有效期、HTTP 状态码 |
+| 管理员创建与两个账号隔离 | pending | 测试步骤与通过/失败；不记录密码、Cookie |
+| 备份恢复与容器重启 | pending | 备份校验、恢复后状态对照 |
+
+`pending` 只能根据实际远程输出更新。普通聊天通过不等于结构化、搜索或云部署完成。
