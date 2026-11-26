@@ -31,7 +31,7 @@
 从仓库根目录、已激活的项目环境运行：
 
 ```powershell
-learningloop notifications run-once --force
+learningloop notifications run-once
 ```
 
-该命令立即检查并执行已启用会话的提醒，生成计划或复盘时可能调用模型。已有投递记录的同一提醒不会重复发送。
+这次检查按会话时区处理已到时间且仍在补发窗口内的提醒。需要立即运行时使用 `learningloop notifications run-once --force`，它会跳过到期时间和补发窗口的检查，可能提前生成当天的早间计划和晚间复盘。生成内容时可能调用模型，已成功投递的同一提醒不会重复发送。
