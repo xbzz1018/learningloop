@@ -27,7 +27,13 @@ GET  /api/v1/runs/{run_id}/trace
 GET  /api/v1/sessions/{session_id}/agent-status
 ```
 
-SSE 事件带递增 ID。客户端断线后使用最后一个事件 ID重新请求，不重复提交用户消息。
+SSE 事件用 `id:` 标记递增的事件 ID。记录最后处理完成的 ID，断线后通过查询参数 `after` 重新连接。例如本地开发服务已处理事件 `42` 时，替换 `SESSION_ID` 后执行：
+
+```powershell
+curl.exe -N "http://127.0.0.1:8765/api/v1/sessions/SESSION_ID/events?after=42"
+```
+
+服务端继续返回 ID 大于 `42` 的事件。首次订阅可省略 `after`，启用认证时需携带该会话所属账号的 Cookie。重连只需请求事件接口。
 
 ## 状态写入
 
