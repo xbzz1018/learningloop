@@ -57,7 +57,15 @@ learningloop doctor
 learningloop serve
 ```
 
-打开 <http://127.0.0.1:8765/>。`doctor` 检查当前配置，不调用模型；真实模型兼容性检查使用 `learningloop doctor --live`。
+打开 <http://127.0.0.1:8765/>。`doctor` 检查当前配置，不调用模型。真实模型兼容性检查使用 `learningloop doctor --live`。
+
+如果默认端口已被占用，可以为这次启动指定一个空闲端口：
+
+```powershell
+learningloop serve --port 8766
+```
+
+然后打开 <http://127.0.0.1:8766/>。需要以后都使用这个端口时，将 `.env` 中的 `LEARNINGLOOP_PORT` 设为 `8766`。
 
 ## 第一次学习
 
